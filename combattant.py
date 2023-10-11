@@ -1,5 +1,8 @@
 from enum import Enum
 
+from etat import Etat
+
+
 class EquipeCombattant(Enum):
     ALLIE = 1
     ENNEMI = 2
@@ -11,7 +14,7 @@ class Combattant:
         self.a_joue = False
         self.robustesse = 45
         self.endurance_base = 30
-        self.sante = 100.0 #TODO make prop ; DONE mais à vérifier
+        self._sante = 100.0 #TODO make prop ; DONE mais à vérifier
         self.vitesse_base = 30
         self.agilite_base = 30
         self.encombrement_total = 0
@@ -65,7 +68,7 @@ class Combattant:
         return self.agilite_base - self.encombrement_reel
     @property
     def endurance_reelle(self):
-        return self.endurance - self.encombrement_reel
+        return self.endurance_base - self.encombrement_reel
     @property
     def points_action(self):
         pa = 1
@@ -96,8 +99,21 @@ class Combattant:
         return 50 - self.dsa
     @property
     def sante(self):
+        '''
+        TODO commenter avec la spec
+        :return:
+        '''
         return min(100, self.pv*100 / (self.sa * self.robustesse / 100))
         #TODO erreur dans les spec !! corrigée ci-dessus
+
+    ''' exemple de setter lorsqu'on veut écrire dans une property
+    @temperature.setter
+    def temperature(self, value):
+        if value < -273.15:
+            raise ValueError("Temperature below -273 is not possible")
+        self._temperature = value
+    '''
+
     @property
     def pat(self):
         return self.points_action - self.pad
@@ -124,9 +140,15 @@ class Combattant:
         # TODO : affichage sous forme de fraction
     @property
     def cpf(self):
-        return 15 / self.agilite_reelle
         ''' CPF = Coût de Pivotement par Face '''
-        # TODO : affichage sous forme de fraction
+        return 15 / self.agilite_reelle
+
+    def cpf_fraction(self, format=False):
+        # TODO : affichage sous forme de fraction: agilite_reelle entier ou réel ?
+        if format:
+            return "%d/%d" % (15, self.agilite_reelle)
+        return (15, self.agilite_reelle)
+
     @property
     def resistance(self):
         return int(max(0, (self.robustesse - 40) / 10))
@@ -172,7 +194,13 @@ class Combattant:
         return int(5 + max(0, (self.endurance_reelle - 30)/10))
         ''' Nombre de tours restant à vivre à un combattant asphyxié/pétrifié '''
         # TODO : est-ce possible de décrémenter toursavivre si c'est une property ?? le but : le combattant meurt quand toursavivre tombe à zéro
+        # on peut faire un setter (cf. plus haut) avec un attribut mis à jour lors du get
 
-def aEtat(self):
-    return 0 #TODO : aucune idée de comment coder ça ! renvoie True s'il y a au moins un état
-#TODO : ajouterEtat, supprimerEtat
+    #def aEtat(self):
+    #    return 0
+
+    def ajoutEtat(self, type: str, valeur: int):
+        self.etats.add(Etat.create(type, valeur))
+        return (len(self.etats) > 1)  # True si il y avait déjà un état, c'est bien ça que tu veux ?
+#TODO : aucune idée de comment coder ça ! renvoie True s'il y a au moins un état
+#TODO : supprimerEtat
